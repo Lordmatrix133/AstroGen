@@ -3,13 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/horoscope", "destination": "/api/horoscope-handler.js" },
+    { "source": "/api/horoscope", "destination": "/api/horoscope-api.js" },
     { "source": "/(.*)", "destination": "/$1" }
-  ],
-  "functions": {
-    "api/**/*": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  ]
 } 

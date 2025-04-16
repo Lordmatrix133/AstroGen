@@ -279,9 +279,12 @@ function App() {
                   <span>Cor do Dia: {signData.color}</span>
                 </div>
                 {signData.advice && (
-                  <div className="flex items-start gap-2 p-3 bg-purple-900/30 rounded-lg border border-purple-500/30 md:col-span-2">
-                    <Lightbulb className="w-5 h-5 text-purple-400 mt-1 shrink-0" />
-                    <span>Conselho do Dia: {signData.advice}</span>
+                  <div className="flex gap-2 items-start mt-6">
+                    <Lightbulb className="w-6 h-6 text-amber-400 shrink-0 mt-1" />
+                    <div>
+                      <h3 className="text-lg font-medium text-amber-300 mb-2">Conselho:</h3>
+                      <p className="text-amber-100">{signData.advice}</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -299,8 +302,7 @@ function App() {
               )}
 
               <div className="mt-4 pt-4 border-t border-purple-500/20 text-gray-400 text-xs flex items-center justify-center gap-1">
-                <Code className="w-3.5 h-3.5" />
-                <span>Powered by AstroGen | Desenvolvido por Dan</span>
+                <span>Resposta IA via api python 🐍</span>
               </div>
             </div>
           </div>

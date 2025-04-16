@@ -35,7 +35,7 @@ function getCurrentDateBrazil() {
 }
 
 // Função para gerar texto do horóscopo usando OpenRouter
-async function generateHoroscopeText(sign, isRebel = false) {
+async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
   
   if (!OPENROUTER_API_KEY) {
@@ -53,17 +53,15 @@ async function generateHoroscopeText(sign, isRebel = false) {
     // Texto base para o prompt
     let prompt = '';
     
-    if (isRebel) {
+    if (isAdvice) {
+      // Prompt para conselho
+      prompt = `Como astrólogo profissional, forneça um conselho astral curto e útil para o signo de ${sign} hoje (${getCurrentDateBrazil()}). Use tom profissional e inspirador. Limite a resposta a apenas uma frase concisa (máximo 15 palavras).`;
+    } else if (isRebel) {
       // Prompt para resumo rebelde
-      prompt = `Como um especialista em astrologia com bom senso de humor, escreva um resumo rebelde, engraçado e direto para a previsão diária do signo de ${sign} para hoje (${getCurrentDateBrazil()}). Use linguagem coloquial, gírias e palavrões de forma moderada, mas mantenha uma opinião sincera sobre o dia. Seja conciso, direto e engraçado. Não explique que é uma consulta astrológica, apenas dê o resumo desse dia. Não ultrapasse 3 frases.`;
+      prompt = `Como um especialista em astrologia com bom senso de humor, escreva um resumo rebelde, engraçado e direto para a previsão diária do signo de ${sign} para hoje (${getCurrentDateBrazil()}). Use linguagem coloquial, gírias e palavrões de forma moderada, mas mantenha uma opinião sincera sobre o dia. Seja conciso, direto e engraçado. Limite a resposta a no máximo 2 frases curtas (máximo 20 palavras total).`;
     } else {
       // Prompt para descrição detalhada
-      prompt = `Como um astrólogo profissional, crie uma previsão astrológica detalhada e profissional para o signo de ${sign} para hoje (${getCurrentDateBrazil()}). Inclua:
-      1. Uma descrição das energias planetárias relevantes.
-      2. Como essas energias afetarão áreas como trabalho, amor e saúde.
-      3. Um conselho útil para navegarem esse dia.
-      
-      A resposta deve ser em português, em um formato estruturado e com tom profissional. Limite a resposta a 120 palavras.`;
+      prompt = `Como um astrólogo profissional, crie uma previsão astrológica concisa para o signo de ${sign} para hoje (${getCurrentDateBrazil()}). Mencione brevemente uma influência planetária e seus efeitos. Seja breve e direto. Limite a resposta a 2-3 frases (máximo 60 palavras).`;
     }
     
     // Dados para enviar à API
@@ -129,8 +127,9 @@ export default async function handler(req, res) {
       return res.status(200).json(horoscopeCache.get(cacheKey));
     }
     
-    // Gerar descrição e resumo
+    // Gerar descrição, conselho e resumo
     const description = await generateHoroscopeText(sign, false);
+    const advice = await generateHoroscopeText(sign, false, true);
     const summary = await generateHoroscopeText(sign, true);
     
     // Criar resposta
@@ -140,6 +139,7 @@ export default async function handler(req, res) {
       description: description,
       luckyNumber: getLuckyNumber(),
       color: getRandomColor(),
+      advice: advice,
       summary: summary
     };
     

@@ -1,5 +1,13 @@
 // API de horóscopo implementada em JavaScript
 import axios from 'axios';
+import * as dotenv from 'dotenv';
+
+// Carrega as variáveis de ambiente do arquivo .env
+dotenv.config();
+
+// Imprime um log para debug
+console.log('Chave da API disponível?', process.env.OPENROUTER_API_KEY ? 'Sim' : 'Não');
+console.log('Primeiros 10 caracteres da chave:', process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0, 10) + '...' : 'Não disponível');
 
 // Cabeçalhos CORS para todas as respostas
 const corsHeaders = {
@@ -53,12 +61,16 @@ async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
     // Texto base para o prompt
     let prompt = '';
     
-    if (isAdvice) {
+    if (isRebel) {
+      // Prompt para estilo rebelde
+      if (isAdvice) {
+        prompt = `Como um jovem debochado e cético sobre astrologia, dê um conselho curto e direto para o signo de ${sign} hoje (${getCurrentDateBrazil()}). Seja sincero, um pouco irônico e direto ao ponto. Limite a resposta a apenas uma frase concisa (máximo 15 palavras).`;
+      } else {
+        prompt = `Como um jovem debochado e cético sobre astrologia, dê uma visão rápida e direta para ${sign} hoje (${getCurrentDateBrazil()}). Seja direto, um pouco irônico, sem muitas gírias. Se for algo bom, diga que "tá ok" ou "menos mal", se for ruim, seja sincero que "tá uma bosta". Limite a resposta a 1-2 frases curtas (máximo 30 palavras).`;
+      }
+    } else if (isAdvice) {
       // Prompt para conselho
       prompt = `Como astrólogo profissional, forneça um conselho astral curto e útil para o signo de ${sign} hoje (${getCurrentDateBrazil()}). Use tom profissional e inspirador. Limite a resposta a apenas uma frase concisa (máximo 15 palavras).`;
-    } else if (isRebel) {
-      // Prompt para resumo rebelde
-      prompt = `Como um especialista em astrologia com bom senso de humor, escreva um resumo rebelde, engraçado e direto para a previsão diária do signo de ${sign} para hoje (${getCurrentDateBrazil()}). Use linguagem coloquial, gírias e palavrões de forma moderada, mas mantenha uma opinião sincera sobre o dia. Seja conciso, direto e engraçado. Limite a resposta a no máximo 2 frases curtas (máximo 20 palavras total).`;
     } else {
       // Prompt para descrição detalhada
       prompt = `Como um astrólogo profissional, crie uma previsão astrológica concisa para o signo de ${sign} para hoje (${getCurrentDateBrazil()}). Mencione brevemente uma influência planetária e seus efeitos. Seja breve e direto. Limite a resposta a 2-3 frases (máximo 60 palavras).`;
@@ -71,7 +83,7 @@ async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
       ],
       model: "anthropic/claude-3-sonnet-20240229",
       max_tokens: 500,
-      temperature: 0.7
+      temperature: isRebel ? 0.9 : 0.7
     };
     
     // Enviando requisição para OpenRouter
@@ -105,7 +117,7 @@ export default async function handler(req, res) {
   }
   
   try {
-    const { sign, use_cache = true } = req.body;
+    const { sign, use_cache = true, isRebel = false } = req.body;
     
     // Validar o signo
     if (!sign) {
@@ -116,7 +128,7 @@ export default async function handler(req, res) {
     }
     
     const today = getCurrentDateBrazil();
-    const cacheKey = `${sign}_${today}`;
+    const cacheKey = `${sign}_${today}_${isRebel ? 'rebel' : 'normal'}`;
     
     // Verificar cache se permitido
     if (use_cache && horoscopeCache.has(cacheKey)) {
@@ -127,10 +139,16 @@ export default async function handler(req, res) {
       return res.status(200).json(horoscopeCache.get(cacheKey));
     }
     
-    // Gerar descrição, conselho e resumo
-    const description = await generateHoroscopeText(sign, false);
-    const advice = await generateHoroscopeText(sign, false, true);
-    const summary = await generateHoroscopeText(sign, true);
+    // Gerar descrição e conselho
+    console.log(`Gerando horóscopo para ${sign}... ${isRebel ? '(estilo rebelde)' : ''}`);
+    const description = await generateHoroscopeText(sign, isRebel, false);
+    const advice = await generateHoroscopeText(sign, isRebel, true);
+    
+    // Criar resumo (apenas para versão não-rebelde)
+    let summary = "";
+    if (!isRebel) {
+      summary = await generateRebelSummary(sign, description, advice);
+    }
     
     // Criar resposta
     const horoscopeData = {
@@ -140,8 +158,13 @@ export default async function handler(req, res) {
       luckyNumber: getLuckyNumber(),
       color: getRandomColor(),
       advice: advice,
-      summary: summary
+      isRebel: isRebel
     };
+    
+    // Adicionar o resumo apenas para versão não-rebelde
+    if (!isRebel) {
+      horoscopeData.summary = summary;
+    }
     
     // Armazenar no cache
     horoscopeCache.set(cacheKey, horoscopeData);
@@ -164,5 +187,63 @@ export default async function handler(req, res) {
       error: 'Erro interno do servidor',
       message: error.message
     });
+  }
+}
+
+// Nova função para gerar o resumo rebelde com base na descrição e no conselho
+async function generateRebelSummary(sign, description, advice) {
+  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+  
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('OPENROUTER_API_KEY não configurada nas variáveis de ambiente');
+  }
+  
+  try {
+    // Configuração para a API OpenRouter
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'HTTP-Referer': 'https://astrogenapp.vercel.app/'
+    };
+    
+    // Prompt para resumo rebelde
+    const prompt = `Você é um jovem brasileiro rebelde e debochado que detesta astrologia e "clichês astrológicos". 
+    
+    Baseando-se nas informações abaixo sobre o horóscopo de ${sign} para hoje (${getCurrentDateBrazil()}), crie um resumo extremamente direto e sem rodeios.
+    
+    A descrição do horóscopo de ${sign} hoje diz: "${description}"
+    O conselho para ${sign} hoje é: "${advice}"
+    
+    Regras importantes:
+    - Seu resumo DEVE refletir o conteúdo real da descrição/conselho, mas de forma bem direta e até um pouco rude
+    - SEJA DEBOCHADO! Se o horóscopo é positivo, diga que "tá ok" ou "menos mal". Se é negativo, diga que "tá uma bosta mesmo"
+    - Não use muitas gírias, apenas uma ou duas no máximo se necessário
+    - Use um tom mais irônico e cético, não tente soar "descolado"
+    - Evite termos específicos de gênero como "mina" ou "cara", mantenha neutro
+    - Seja breve: máximo 1-2 frases curtas e diretas
+    - Se o horóscopo menciona amor, trabalho ou saúde, seja mais direto sobre o que realmente significa
+    - Não estique as palavras (tipo "caaaara") e evite emojis
+    - Ideal que soe como alguém que diz verdades duras, mas sem ser grosseiro demais
+    
+    OBS: Este resumo será mostrado DEPOIS que a pessoa já leu a descrição formal e o conselho, então você está dando uma versão mais crua e direta do que já foi dito.`;
+    
+    // Dados para enviar à API
+    const data = {
+      messages: [
+        { role: "user", content: prompt }
+      ],
+      model: "anthropic/claude-3-sonnet-20240229",
+      max_tokens: 500,
+      temperature: 0.9
+    };
+    
+    // Enviando requisição para OpenRouter
+    const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', data, { headers });
+    
+    // Extraindo a resposta gerada
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Erro ao gerar resumo rebelde:', error);
+    return `Resumo rebelde não disponível: ${error.message}`;
   }
 } 

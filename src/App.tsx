@@ -225,7 +225,7 @@ function App() {
         
         <div className="mt-8 pt-4 border-t border-gray-800 text-gray-500 text-xs text-center flex items-center justify-center gap-1">
           <Code className="w-3.5 h-3.5" />
-          <span>Powered by AstroGen | Desenvolvido por Dan</span>
+          <span>Powered by AstroGen | Desenvolvido</span>
         </div>
       </div>
 
@@ -301,8 +301,8 @@ function App() {
                 </div>
               )}
 
-              <div className="mt-4 pt-4 border-t border-purple-500/20 text-gray-400 text-xs flex items-center justify-center gap-1">
-                <span>Resposta IA via api python 🐍</span>
+              <div className="mt-4 pt-4 border-t border-purple-500/20 text-gray-400 text-xs flex items-center justify-start gap-1">
+                <span>Resposta IA via AstroGen API &lt;/&gt;</span>
               </div>
             </div>
           </div>

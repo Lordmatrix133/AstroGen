@@ -228,4 +228,18 @@ Resumindo: [Qualquer texto - será substituído]
             
     except Exception as e:
         print(f"Erro na função: {str(e)}")
-        return {'statusCode': 500, 'headers': cors_headers, 'body': json.dumps({'error': 'Erro ao processar sua solicitação', 'details': str(e)})} 
+        return {'statusCode': 500, 'headers': cors_headers, 'body': json.dumps({'error': 'Erro ao processar sua solicitação', 'details': str(e)})}
+
+# Adicionar no final do arquivo
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        # Quando executado como um script, o primeiro argumento é o JSON com os dados
+        import json
+        body = json.loads(sys.argv[1])
+        mock_event = {
+            'httpMethod': 'POST',
+            'body': json.dumps(body)
+        }
+        result = handler(mock_event, {})
+        print(result.get('body', '')) 

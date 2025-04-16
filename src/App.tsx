@@ -23,7 +23,7 @@ function App() {
 
   // Endpoint da API - detecta se estamos em ambiente de desenvolvimento ou produção
   const API_ENDPOINT = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://localhost:9999/api/horoscope.py'
+    ? 'http://localhost:9999/api/horoscope'
     : '/api/horoscope';
 
   const signs = [
@@ -94,7 +94,7 @@ function App() {
     setError(null);
     
     try {
-      // Chamando a função Python no servidor local
+      // Chamando a API de horóscopo
       const response = await axios.post(API_ENDPOINT, { 
         sign: selectedSign,
         use_cache: false

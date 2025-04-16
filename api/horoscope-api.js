@@ -91,7 +91,10 @@ async function generateHoroscopeText(sign, isRebel = false) {
 export default async function handler(req, res) {
   // Lidar com requisições OPTIONS (para CORS)
   if (req.method === 'OPTIONS') {
-    res.status(200).set(corsHeaders).end();
+    Object.keys(corsHeaders).forEach(key => {
+      res.setHeader(key, corsHeaders[key]);
+    });
+    res.status(200).end();
     return;
   }
   
@@ -119,6 +122,10 @@ export default async function handler(req, res) {
     
     // Verificar cache se permitido
     if (use_cache && horoscopeCache.has(cacheKey)) {
+      // Definir cabeçalhos CORS
+      Object.keys(corsHeaders).forEach(key => {
+        res.setHeader(key, corsHeaders[key]);
+      });
       return res.status(200).json(horoscopeCache.get(cacheKey));
     }
     
@@ -139,12 +146,21 @@ export default async function handler(req, res) {
     // Armazenar no cache
     horoscopeCache.set(cacheKey, horoscopeData);
     
+    // Definir cabeçalhos CORS
+    Object.keys(corsHeaders).forEach(key => {
+      res.setHeader(key, corsHeaders[key]);
+    });
+    
     // Retornar resposta
-    return res.status(200).set(corsHeaders).json(horoscopeData);
+    return res.status(200).json(horoscopeData);
     
   } catch (error) {
     console.error('Erro na API:', error);
-    return res.status(500).set(corsHeaders).json({
+    // Definir cabeçalhos CORS
+    Object.keys(corsHeaders).forEach(key => {
+      res.setHeader(key, corsHeaders[key]);
+    });
+    return res.status(500).json({
       error: 'Erro interno do servidor',
       message: error.message
     });

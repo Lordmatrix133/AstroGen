@@ -81,7 +81,7 @@ async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: "anthropic/claude-3-sonnet-20240229",
+      model:"deepseek/deepseek-r1:free",
       max_tokens: 500,
       temperature: isRebel ? 0.9 : 0.7
     };

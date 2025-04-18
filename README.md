@@ -2,7 +2,6 @@
 
 Um gerador de horóscopo diário que utiliza IA para criar previsões personalizadas e resumos rebeldes para cada signo.
 
-![AstroGen Preview](https://i.postimg.cc/P52wTV9K/images-removebg-preview.png)
 
 ## Funcionalidades
 

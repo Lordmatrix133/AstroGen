@@ -9,7 +9,7 @@ dotenv.config();
 console.log('Chave da API disponível?', process.env.OPENROUTER_API_KEY ? 'Sim' : 'Não');
 console.log('Primeiros 10 caracteres da chave:', process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0, 10) + '...' : 'Não disponível');
 
-// Cabeçalhos CORS para todas as respostas
+// Cabeçalhos CORS para todas as reFspostas
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -81,7 +81,7 @@ async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: "deepseek/deepseek-chat:free",
+      model: "google/gemma-3-27b-it:free",
       max_tokens: 500,
       temperature: isRebel ? 0.9 : 0.7
     };
@@ -232,7 +232,7 @@ async function generateRebelSummary(sign, description, advice) {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: "deepseek/deepseek-chat:free",
+      model: "google/gemma-3-27b-it:free",
       max_tokens: 500,
       temperature: 0.9
     };

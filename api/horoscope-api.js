@@ -55,8 +55,7 @@ async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'HTTP-Referer': 'https://astrogenapp.vercel.app/',
-      'X-Title': 'AstroGen'
+      'HTTP-Referer': 'https://astrogenapp.vercel.app/'
     };
     
     // Texto base para o prompt
@@ -79,35 +78,21 @@ async function generateHoroscopeText(sign, isRebel = false, isAdvice = false) {
     
     // Dados para enviar à API
     const data = {
-      model: "google/gemma-3-27b-it:free",
       messages: [
         { role: "user", content: prompt }
       ],
-      temperature: isRebel ? 0.9 : 0.7,
-      max_tokens: 500
+      model: "deepseek/deepseek-chat:free",
+      max_tokens: 500,
+      temperature: isRebel ? 0.9 : 0.7
     };
-    
-    console.log('Enviando requisição para OpenRouter com dados:', JSON.stringify(data, null, 2));
     
     // Enviando requisição para OpenRouter
     const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', data, { headers });
-    
-    console.log('Resposta recebida:', JSON.stringify(response.data, null, 2));
-    
-    // Verificar se há dados na resposta antes de acessá-los
-    if (!response.data || !response.data.choices || !response.data.choices.length) {
-      console.error('Resposta da API não contém os dados esperados:', response.data);
-      throw new Error('Resposta da API não contém os dados esperados');
-    }
     
     // Extraindo a resposta gerada
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error('Erro ao consultar API OpenRouter:', error);
-    if (error.response) {
-      console.error('Detalhes da resposta:', error.response.data);
-      console.error('Status:', error.response.status);
-    }
     throw new Error(`Erro ao gerar texto: ${error.message}`);
   }
 }
@@ -218,8 +203,7 @@ async function generateRebelSummary(sign, description, advice) {
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'HTTP-Referer': 'https://astrogenapp.vercel.app/',
-      'X-Title': 'AstroGen'
+      'HTTP-Referer': 'https://astrogenapp.vercel.app/'
     };
     
     // Prompt para resumo rebelde
@@ -245,33 +229,21 @@ async function generateRebelSummary(sign, description, advice) {
     
     // Dados para enviar à API
     const data = {
-      model: "google/gemma-3-27b-it:free",
       messages: [
         { role: "user", content: prompt }
       ],
-      temperature: 0.9,
-      max_tokens: 500
+      model: "deepseek/deepseek-chat:free",
+      max_tokens: 500,
+      temperature: 0.9
     };
-    
-    console.log('Enviando requisição para resumo rebelde');
     
     // Enviando requisição para OpenRouter
     const response = await axios.post('https://openrouter.ai/api/v1/chat/completions', data, { headers });
-    
-    // Verificar se há dados na resposta antes de acessá-los
-    if (!response.data || !response.data.choices || !response.data.choices.length) {
-      console.error('Resposta da API não contém os dados esperados para o resumo rebelde:', response.data);
-      return 'Resumo rebelde não disponível: formato de resposta inválido';
-    }
     
     // Extraindo a resposta gerada
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error('Erro ao gerar resumo rebelde:', error);
-    if (error.response) {
-      console.error('Detalhes da resposta:', error.response.data);
-      console.error('Status:', error.response.status);
-    }
     return `Resumo rebelde não disponível: ${error.message}`;
   }
 } 

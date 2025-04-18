@@ -302,7 +302,7 @@ function App() {
               )}
 
               <div className="mt-4 pt-4 border-t border-purple-500/20 text-gray-400 text-xs flex items-center justify-start gap-1">
-                <span>Resposta IA via AstroGen API &lt;/&gt;</span>
+                <span>Resposta via AstroGen API &lt;/&gt;</span>
               </div>
             </div>
           </div>
